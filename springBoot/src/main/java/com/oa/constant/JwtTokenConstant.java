@@ -13,14 +13,12 @@ import org.springframework.stereotype.Component;
 
 public class JwtTokenConstant {
     public static final String CLAIM_KEY_USERNAME = "sub";
-    public static final String CLAIM_KEY_CREATED = "iat";
-    public static final String CLAIM_KEY_AUTHORITIES = "auth";
+    public static final String JWT_TOKEN_HEADER = "Authorization";
+    public static final String JWT_TOKEN_HEAD = "Bearer ";
 
-    public static  String CLAIM_KEY_SECRET = "OnlineOfficeByZqc";
-    public static  String JWT_TOKEN_SECRET = "OnlineOfficeJwtT";
-    //@Value("${jwt.tokenHeader}")
-    public static  String JWT_TOKEN_HEADER = "Authorization";
-    //@Value("${jwt.tokenHead}")
-    public static  String JWT_TOKEN_HEAD = "Bearer ";
+    public static String CLAIM_KEY_SECRET = "OnlineOfficeByZqc";
+
     public static final long CLAIM_KEY_EXPIRATION = 60 * 5;
+    public static final long REFRESH_KEY_EXPIRATION = 60 * 30;
+
 }

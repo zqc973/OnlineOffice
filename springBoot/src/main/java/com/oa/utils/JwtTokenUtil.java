@@ -1,14 +1,11 @@
 package com.oa.utils;
 
-import cn.hutool.core.date.DateUtil;
 import cn.hutool.crypto.SecureUtil;
 import cn.hutool.crypto.symmetric.AES;
 import com.oa.constant.JwtTokenConstant;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
@@ -30,15 +27,19 @@ public class JwtTokenUtil {
      * @return
      */
     public String generateToken(UserDetails userDetails){
-
-        //Collection<? extends GrantedAuthority> authorities = userDetails.getAuthorities();
-        //ArrayList<String> authoritiesList = new ArrayList<>(authorities.size() * 2);
-        ////设置权限
-        //authorities.forEach(auth -> authoritiesList.add(auth.getAuthority()));
         Map<String, Object> claims = new HashMap<>();
         claims.put(JwtTokenConstant.CLAIM_KEY_USERNAME, userDetails.getUsername());
-        //claims.put(JwtTokenConstant.CLAIM_KEY_AUTHORITIES, authoritiesList);
-        return JwtTokenConstant.JWT_TOKEN_HEAD+generateToken(claims);
+        return generateToken(claims, JwtTokenConstant.CLAIM_KEY_EXPIRATION);
+    }
+    /**
+     * 根据用户信息生成刷新token
+     * @param userDetails
+     * @return
+     */
+    public String generateRefreshToken(UserDetails userDetails){
+        Map<String, Object> claims = new HashMap<>();
+        claims.put(JwtTokenConstant.CLAIM_KEY_USERNAME, userDetails.getUsername());
+        return generateToken(claims, JwtTokenConstant.REFRESH_KEY_EXPIRATION);
     }
 
     /**
@@ -60,27 +61,23 @@ public class JwtTokenUtil {
     /**
      * 校验token合法性
      * @param token
-     * @param userDetails
      * @return
      */
-    public boolean validateToken(String token, UserDetails userDetails){
-        String username = getUserNameByToken(token);
-        return username.equals(userDetails.getUsername()) && !isTokenExpiration(token);
-    }
-
-    /**
-     * 判断token是否可以被刷新
-     */
-    public boolean canRefresh(String token){
-        return  !isTokenExpiration(token);
+    public boolean validateToken(String token){
+        return null != getClaimsByToken(token);
     }
 
     /**
      * 刷新token
+     * @return
      */
-    public String refreshToken(String token){
-        Claims claims = getClaimsByToken(token);
-        return generateToken(claims);
+    public Map<String, Object> refreshToken(String refreshToken){
+        Claims claims = getClaimsByToken(refreshToken);
+        Map<String, Object> token = new HashMap<>();
+        token.put("access_token", generateToken(claims, JwtTokenConstant.CLAIM_KEY_EXPIRATION));
+        token.put("refresh_token", generateToken(claims, JwtTokenConstant.REFRESH_KEY_EXPIRATION));
+
+        return token;
     }
 
     /**
@@ -88,8 +85,13 @@ public class JwtTokenUtil {
      * @param token
      * @return
      */
-    private boolean isTokenExpiration(String token) {
-        Date expireDate = getExpiredDateByToken(token);
+    public boolean isTokenExpiration(String token) {
+        Date expireDate = null;
+        try {
+            expireDate = getExpiredDateByToken(token);
+        } catch (Exception e) {
+            return false;
+        }
         return expireDate.before(new Date());
     }
 
@@ -122,15 +124,16 @@ public class JwtTokenUtil {
     }
 
     /**
-     * 根据荷载生成token
-     * @param claims
+     * 根据荷载及失效时间生成token,
+     * @param claims 荷载
+     * @param expiration 时间（秒）
      * @return
      */
-    private String generateToken(Map<String, Object> claims){
+    private String generateToken(Map<String, Object> claims, long expiration){
         return Jwts.builder()
                 .setClaims(claims)
                 .setIssuedAt(new Date())
-                .setExpiration(generateExpiration())
+                .setExpiration(generateExpiration(expiration*1000))
                 .signWith(SignatureAlgorithm.HS512, JwtTokenConstant.CLAIM_KEY_SECRET)
                 .compact();
     }
@@ -139,26 +142,8 @@ public class JwtTokenUtil {
      * 生成token失效时间
      * @return
      */
-    private Date generateExpiration() {
-        return new Date(System.currentTimeMillis() + JwtTokenConstant.CLAIM_KEY_EXPIRATION*1000);
-    }
-
-    /**
-     * 为token加密
-     * @return
-     */
-    public String encryptToken(String token) {
-        AES aes = SecureUtil.aes(JwtTokenConstant.JWT_TOKEN_SECRET.getBytes());
-        return new String(aes.encrypt(token));
-    }
-
-    /**
-     * 为token加密
-     * @return
-     */
-    public String decryptToken(String encrypt) {
-        AES aes = SecureUtil.aes(JwtTokenConstant.JWT_TOKEN_SECRET.getBytes());
-        return new String(aes.decrypt(encrypt));
+    private Date generateExpiration(long expiration) {
+        return new Date(System.currentTimeMillis() + expiration);
     }
 
 

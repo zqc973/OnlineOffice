@@ -1,41 +1,28 @@
 package com.oa.config.security;
 
-import cn.hutool.core.util.IdUtil;
-import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import com.oa.common.RespBean;
-import com.oa.exception.MyAuthenticationException;
+import com.oa.constant.JwtTokenConstant;
 import com.oa.filter.JwtTokenFilter;
 import com.oa.service.impl.UserServiceImpl;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.oa.utils.RedisUtil;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.authentication.*;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
-import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.security.web.authentication.session.SessionAuthenticationStrategy;
+import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
 
 import javax.annotation.Resource;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.io.PrintWriter;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * @PackageName:com.oa.config
@@ -48,13 +35,15 @@ import java.util.Map;
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Resource
-    private AuthenticationSuccess authenticationSuccess;
+    private MyAuthenticationSuccessHandler authenticationSuccess;
     @Resource
     private AuthenticationFailureHandler authenticationFailureHandler;
     @Resource
     private UserServiceImpl userDetailsService;
     @Resource
     private JwtTokenFilter jwtTokenFilter;
+    @Resource
+    private RedisUtil redisUtil;
 
 
     /**
@@ -76,6 +65,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     public void configure(WebSecurity web) throws Exception {
         web.ignoring()
                 .antMatchers(
+                        "/captcha",
+                        "/refreshToken",
                         "/doc.html",
                         "/webjars/**",
                         "/swagger-resources/**",
@@ -114,6 +105,14 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .successHandler(authenticationSuccess)
                 //登录失败处理器
                 .failureHandler(authenticationFailureHandler)
+                .loginProcessingUrl("/login")
+                .permitAll()
+            .and()
+                .logout()
+                //退出登录处理器
+                .logoutSuccessHandler(logoutSuccessHandler())
+                .logoutUrl("/logout")
+                .permitAll()
             .and()
                 //其余所有请求都需要登录认证才能访问
                 .authorizeRequests().anyRequest().authenticated()
@@ -154,6 +153,25 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             RespBean respBean = new RespBean(403, "权限不足，请联系管理员！", null);
             PrintWriter writer = response.getWriter();
             writer.write(JSONUtil.toJsonStr(respBean));
+            writer.flush();
+            writer.close();
+        };
+    }
+
+    /**
+     * 登出处理器
+     * @return
+     */
+    @Bean
+    public LogoutSuccessHandler logoutSuccessHandler(){
+        return (request, response, authentication) -> {
+            String header_token = request.getHeader(JwtTokenConstant.JWT_TOKEN_HEADER);
+            String access_token = header_token.replace(JwtTokenConstant.JWT_TOKEN_HEAD, "");
+
+            redisUtil.del(access_token,header_token);
+
+            PrintWriter writer = response.getWriter();
+            writer.write(JSONUtil.toJsonStr(RespBean.success("退出登录成功！")));
             writer.flush();
             writer.close();
         };

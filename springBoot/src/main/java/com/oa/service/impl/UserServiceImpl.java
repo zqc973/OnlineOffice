@@ -37,7 +37,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             return null;
         }
         // 根据用户名查询数据库
-        User user = userMapper.selectOne(new QueryWrapper<User>().eq("username", username));
+        User user = userMapper.loadUserByUsername(username);
         //if(ObjectUtil.isEmpty(user)){
         //    throw new UsernameNotFoundException("用户名不存在，登录失败！");
         //}

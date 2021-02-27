@@ -1,5 +1,6 @@
 package com.oa.config.security;
 
+import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.crypto.SecureUtil;
 import cn.hutool.crypto.symmetric.AES;
@@ -22,10 +23,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @PackageName:com.oa.config.security
@@ -35,7 +33,7 @@ import java.util.Map;
  * @date 2021/2/22 14:46
  */
 @Configuration
-public class AuthenticationSuccess implements AuthenticationSuccessHandler {
+public class MyAuthenticationSuccessHandler implements AuthenticationSuccessHandler {
 
     @Resource
     private JwtTokenUtil jwtTokenUtil;
@@ -59,17 +57,18 @@ public class AuthenticationSuccess implements AuthenticationSuccessHandler {
 
         //生成jwt
         String jwtToken = jwtTokenUtil.generateToken(principal);
-        //String encryptToken = jwtTokenUtil.encryptToken(jwtToken);
 
-        String refresh_token = IdUtil.simpleUUID();
+        String refresh_token = jwtTokenUtil.generateRefreshToken(principal);
 
         Map<String, Object> map = new HashMap<>();
         map.put("access_token", jwtToken);
         map.put("refresh_token", refresh_token);
+        map.put("token_head",JwtTokenConstant.JWT_TOKEN_HEAD);
 
-        redisUtil.set(refresh_token,jwtToken,60*30);
+        redisUtil.set(JwtTokenConstant.JWT_TOKEN_HEAD+jwtToken,refresh_token,JwtTokenConstant.REFRESH_KEY_EXPIRATION);
+        redisUtil.set(jwtToken,jwtToken,JwtTokenConstant.CLAIM_KEY_EXPIRATION);
 
-        RespBean resp = RespBean.success("登录成功", map);
+        RespBean resp = RespBean.success("登录成功！", map);
 
         PrintWriter writer = response.getWriter();
         writer.write(JSONUtil.toJsonStr(resp));
