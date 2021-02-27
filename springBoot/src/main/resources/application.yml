@@ -1,0 +1,18 @@
+server:
+  port: 8081
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/onlineoffice?serverTimezone=Asia/Shanghai&useUnicode=true&characterEncoding=utf8&useSSL=false
+    username: root
+    password: 333
+
+
+#jwt配置
+jwt:
+  #jwt存储的请求头
+  tokenHeader: Authorization
+  #JWT 加密解密使用的密钥
+  secret: OnlineOfficeByZqc
+  # JWT 负载中拿到开头
+  tokenHead: Bearer
