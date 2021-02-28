@@ -4,7 +4,6 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import springfox.documentation.builders.*;
-import springfox.documentation.schema.ModelRef;
 import springfox.documentation.service.*;
 import springfox.documentation.spi.DocumentationType;
 import springfox.documentation.spi.service.ApiListingScannerPlugin;
@@ -13,7 +12,6 @@ import springfox.documentation.spring.web.readers.operation.CachingOperationName
 import com.google.common.collect.Sets;
 
 import java.util.*;
-import java.util.function.Consumer;
 
 /**
  * 手动添加swagger接口，如登录接口等
