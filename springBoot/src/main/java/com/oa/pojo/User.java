@@ -12,6 +12,7 @@ import com.baomidou.mybatisplus.annotation.TableField;
 import java.io.Serializable;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -34,61 +35,47 @@ import org.springframework.security.core.userdetails.UserDetails;
 @EqualsAndHashCode(callSuper = false)
 @Accessors(chain = true)
 @TableName("t_user")
-@ApiModel(value="User对象", description="")
-public class User implements Serializable, UserDetails {
+public class User implements UserDetails {
 
     private static final long serialVersionUID = 1L;
 
-    @ApiModelProperty(value = "表ID")
     @TableId(value = "id", type = IdType.ASSIGN_ID)
     private Integer id;
 
-    @ApiModelProperty(value = "用户名")
     @TableField("username")
     private String username;
 
-    @ApiModelProperty(value = "密码")
     @TableField("password")
     private String password;
 
-    @ApiModelProperty(value = "真实姓名")
     @TableField("true_name")
     private String trueName;
 
-    @ApiModelProperty(value = "性别 0女 1男")
     @TableField("sex")
     private Integer sex;
 
-    @ApiModelProperty(value = "邮箱")
     @TableField("email")
     private String email;
 
-    @ApiModelProperty(value = "手机号")
     @TableField("phone_num")
     private String phoneNum;
 
-    @ApiModelProperty(value = "地址")
     @TableField("address")
     private String address;
 
-    @ApiModelProperty(value = "部门ID")
     @TableField("dept_id")
     private Integer deptId;
 
-    @ApiModelProperty(value = "职务ID")
     @TableField("job_id")
     private Integer jobId;
 
-    @ApiModelProperty(value = "创建时间")
     @TableField(value = "create_time", fill = FieldFill.INSERT)
-    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     private Date createTime;
 
-    @ApiModelProperty(value = "是否启用 0否 1是")
     @TableField("enabled")
     private Integer enabled;
 
-    @ApiModelProperty(value = "角色列表")
     @TableField(exist = false)
     private List<Role> roles;
 

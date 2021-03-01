@@ -1,5 +1,7 @@
 package com.oa.common;
 
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -16,10 +18,14 @@ import lombok.experimental.Accessors;
 @AllArgsConstructor
 @NoArgsConstructor
 @Accessors(chain = true)
+@ApiModel("接口返回类")
 public class RespBean {
 
+    @ApiModelProperty("返回状态码")
     private Integer code;
+    @ApiModelProperty("返回消息")
     private String msg;
+    @ApiModelProperty("返回参数")
     private Object data;
 
     public RespBean(Integer code, String msg){

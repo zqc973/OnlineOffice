@@ -45,7 +45,7 @@ public class OnlineOfficeApplicationTests {
     public void getEncodePassword(){
         PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
         String password = "123456";
-        //$2a$10$M/KyYYQw9cCZSXAGHRAt.usX3TzALO.WWYMb4VpnXOpewsgLLlWeq
+        //$2a$10$zB7quEcn3xXes6IhAOrGGuafLCdwEqlAzydA0N51nnzmakA0xjzCm
         log.info("加密后的密码：{}",passwordEncoder.encode(password));
     }
 }

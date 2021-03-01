@@ -4,6 +4,7 @@ import com.oa.pojo.User;
 import com.baomidou.mybatisplus.extension.service.IService;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * <p>
@@ -16,4 +17,6 @@ import java.util.List;
 public interface UserService extends IService<User> {
 
     List<User> getAllUsers(User user);
+
+    int addUser(User user);
 }
