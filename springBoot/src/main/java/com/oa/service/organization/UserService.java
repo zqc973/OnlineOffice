@@ -1,7 +1,9 @@
-package com.oa.service;
+package com.oa.service.organization;
 
 import com.oa.pojo.User;
 import com.baomidou.mybatisplus.extension.service.IService;
+
+import java.util.List;
 
 /**
  * <p>
@@ -13,4 +15,5 @@ import com.baomidou.mybatisplus.extension.service.IService;
  */
 public interface UserService extends IService<User> {
 
+    List<User> getAllUsers(User user);
 }

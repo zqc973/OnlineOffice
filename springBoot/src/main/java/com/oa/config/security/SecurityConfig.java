@@ -4,10 +4,11 @@ import cn.hutool.json.JSONUtil;
 import com.oa.common.RespBean;
 import com.oa.constant.JwtTokenConstant;
 import com.oa.filter.JwtTokenFilter;
-import com.oa.service.impl.UserServiceImpl;
+import com.oa.service.organization.UserServiceImpl;
 import com.oa.utils.RedisUtil;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.ObjectPostProcessor;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
@@ -17,7 +18,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.access.AccessDeniedHandler;
-import org.springframework.security.web.authentication.AuthenticationFailureHandler;
+import org.springframework.security.web.access.intercept.FilterSecurityInterceptor;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
 
@@ -34,10 +35,15 @@ import java.io.PrintWriter;
 @Configuration
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
+
+    @Resource
+    private MyAccessDecisionManager myAccessDecisionManager;
+    @Resource
+    private MyFilterInvocationSecurityMetadataSource myFilterInvocationSecurityMetadataSource;
     @Resource
     private MyAuthenticationSuccessHandler authenticationSuccess;
     @Resource
-    private AuthenticationFailureHandler authenticationFailureHandler;
+    private MyAuthenticationFailureHandler authenticationFailureHandler;
     @Resource
     private UserServiceImpl userDetailsService;
     @Resource
@@ -115,7 +121,18 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .permitAll()
             .and()
                 //其余所有请求都需要登录认证才能访问
-                .authorizeRequests().anyRequest().authenticated()
+                .authorizeRequests()
+
+                .withObjectPostProcessor(new ObjectPostProcessor<FilterSecurityInterceptor>() {
+                    @Override
+                    public <O extends FilterSecurityInterceptor> O postProcess(O o) {
+                        //设置认证决策器
+                        o.setAccessDecisionManager(myAccessDecisionManager);
+                        o.setSecurityMetadataSource(myFilterInvocationSecurityMetadataSource);
+                        return o;
+                    }
+                })
+                .anyRequest().authenticated()
             .and()
                 //关闭session
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)

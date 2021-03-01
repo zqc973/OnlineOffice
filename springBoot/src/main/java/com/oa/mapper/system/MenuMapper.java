@@ -1,7 +1,10 @@
-package com.oa.mapper;
+package com.oa.mapper.system;
 
 import com.oa.pojo.Menu;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import org.apache.ibatis.annotations.Select;
+
+import java.util.List;
 
 /**
  * <p>
@@ -13,4 +16,6 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
  */
 public interface MenuMapper extends BaseMapper<Menu> {
 
+    @Select("select * from t_menu")
+    List<Menu> getAllMenus();
 }

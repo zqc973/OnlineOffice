@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.oa.mapper.organization.UserMapper">
+
+    <resultMap id="User" type="com.oa.pojo.User">
+        <id property="id" column="id"/>
+        <result column="username" property="username"/>
+        <result column="password" property="password"/>
+        <result column="true_name" property="trueName"/>
+        <result column="sex" property="sex"/>
+        <result column="email" property="email"/>
+        <result column="phone_num" property="phoneNum"/>
+        <result column="address" property="address"/>
+        <result column="dept_id" property="deptId"/>
+        <result column="job_id" property="jobId"/>
+        <result column="create_time" property="createTime"/>
+        <result column="enabled" property="enabled"/>
+    </resultMap>
+
+    <resultMap id="UserWithRole" type="com.oa.pojo.User" extends="User">
+        <collection property="roles" ofType="com.oa.pojo.Role">
+            <id property="id" column="rid"/>
+            <result column="rname" property="name"/>
+            <result column="rremark" property="remark"/>
+            <result column="ris_del" property="isDel"/>
+            <result column="rcreate_time" property="createTime"/>
+        </collection>
+    </resultMap>
+
+    <select id="loadUserByUsername" resultMap="UserWithRole">
+        select tu.*, tr.id rid, tr.name rname, tr.remark rremark, tr.is_del ris_del, tr.create_time rcreate_time
+        from t_user tu
+            left join t_user_role tur on tu.id = tur.user_id
+            left join t_role tr on tr.id = tur.role_id
+        where tu.username = 'user'
+    </select>
+    <select id="getAllUsers" resultType="com.oa.pojo.User">
+        select id, username, true_name, sex, email, phone_num, address, dept_id, job_id, create_time, enabled
+        from t_user tu
+    </select>
+</mapper>

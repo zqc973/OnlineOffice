@@ -1,4 +1,4 @@
-package com.oa.controller;
+package com.oa.controller.system;
 
 
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
  * @since 2021-02-24
  */
 @RestController
-@RequestMapping("/role")
-public class RoleController {
+@RequestMapping("/menu")
+public class MenuController {
 
 }

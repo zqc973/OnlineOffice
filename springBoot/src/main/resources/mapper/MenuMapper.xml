@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.oa.mapper.system.MenuMapper">
+
+    <resultMap id="Menu" type="com.oa.pojo.Menu">
+        <id property="id" column="id"/>
+        <result column="title" property="title"/>
+        <result column="href" property="href"/>
+        <result column="parent_id" property="parentId"/>
+        <result column="grade" property="grade"/>
+        <result column="is_leaf" property="isLeaf"/>
+        <result column="icon" property="icon"/>
+        <result column="create_time" property="createTime"/>
+    </resultMap>
+    <resultMap id="MenuByRole" type="com.oa.pojo.Menu" extends="Menu">
+        <collection property="roles" ofType="com.oa.pojo.Role">
+            <id property="id" column="rid"/>
+            <result column="rname" property="name"/>
+            <result column="rremark" property="remark"/>
+            <result column="ris_del" property="isDel"/>
+            <result column="rcreate_time" property="createTime"/>
+        </collection>
+    </resultMap>
+
+</mapper>

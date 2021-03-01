@@ -4,6 +4,7 @@ import cn.hutool.core.date.DateUtil;
 import cn.hutool.crypto.SecureUtil;
 import cn.hutool.crypto.symmetric.AES;
 import com.oa.constant.JwtTokenConstant;
+import com.oa.utils.RedisUtil;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import lombok.extern.slf4j.Slf4j;
@@ -12,6 +13,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import javax.annotation.Resource;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -20,16 +22,23 @@ import java.util.Map;
 @SpringBootTest
 public class OnlineOfficeApplicationTests {
 
+    @Resource
+    private RedisUtil redisUtil;
+
     @Test
     void getToken() {
         Map<String, Object> claims = new HashMap<>();
+
         claims.put(JwtTokenConstant.CLAIM_KEY_USERNAME, "zqc");
-        System.out.println(Jwts.builder()
+        String s = Jwts.builder()
                 .setClaims(claims)
                 .setIssuedAt(new Date())
+                .setExpiration(DateUtil.parse("2022-01-01 00:00:00"))
                 .signWith(SignatureAlgorithm.HS512, JwtTokenConstant.CLAIM_KEY_SECRET)
-                .compact());
+                .compact();
 
+        redisUtil.set(s,s);
+        System.out.println(s);
     }
 
     @Test

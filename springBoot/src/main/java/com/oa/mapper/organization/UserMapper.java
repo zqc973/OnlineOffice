@@ -1,8 +1,10 @@
-package com.oa.mapper;
+package com.oa.mapper.organization;
 
 import com.oa.pojo.User;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Select;
+
+import java.util.List;
 
 /**
  * <p>
@@ -14,6 +16,9 @@ import org.apache.ibatis.annotations.Select;
  */
 public interface UserMapper extends BaseMapper<User> {
 
-    @Select("select * from t_user ")
+
     User loadUserByUsername(String username);
+
+
+    List<User> getAllUsers(User user);
 }
